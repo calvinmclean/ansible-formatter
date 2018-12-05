@@ -3,21 +3,30 @@
 def main
 
   usage = "Usage:\n" \
-        "  ./formatter.rb [-f | --files] FILE...\n" \
-        "  ./formatter.rb [-d | --dir] ROLE_DIR\n"
-  $verbose = false
+        "  ./formatter.rb [-n N] [-f | --files] FILE...\n" \
+        "  ./formatter.rb [-n N] [-d | --dir] ROLE_DIR\n"
 
+  # Individual optional command-line options
+  $verbose = false
   if ARGV.include?('-v') or ARGV.include?('--verbose')
     ARGV.delete('-v')
     ARGV.delete('--verbose')
     $verbose = true
   end
 
+  $num_pairs = 2
+  if ARGV.include?('-n')
+    $num_pairs = ARGV[ARGV.index('-n') + 1]
+    ARGV.delete('-n')
+  end
+
+  # Exclusive/required command-line options
   if ARGV.include?('-h') or ARGV.include?('--help')
     print usage
     print "Change formatting of Ansible task files from oneline syntax to map syntax\n"
     print "Use -f or --files to format single files\n"
     print "Use -d or --dir to format all files in ROLE_DIR/*/tasks/*.yml\n"
+    print "Use -n to specify the max number of key=value pairs in a single line. Default 2\n"
     exit(0)
   elsif ARGV.include?('-f') or ARGV.include?('--files')
     ARGV.delete('-f')
@@ -68,7 +77,7 @@ def safe_line?(line)
   ]
   return (
     skip_these.any? { |x| line.include?(x) } or
-    line.count('=') < 3 or
+    line.count('=') <= $num_pairs or
     line[0] == '#' or
     line == "\n"
   )
