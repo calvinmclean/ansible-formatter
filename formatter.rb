@@ -44,13 +44,13 @@ def main
 
   files.each do |file_name|
     new_file_string = ''
-    changed = false
+    changed = 0
     File.open(file_name, 'r') do |file|
       file.each_line do |line|
         if safe_line?(line)
           new_file_string += line
         else
-          changed = true
+          changed += 1
           module_name, module_data = extract_info(line)
           new_file_string += "#{module_name}:\n"
           spacing = module_name.match(/^\s*/)[0]
@@ -62,7 +62,7 @@ def main
       end
     end
     File.open("#{file_name}", 'w+') do |file|
-      print "Formatting #{file_name}\n" if $verbose and changed
+      print "Changed #{changed} lines in #{file_name}\n" if $verbose and changed > 0
       file.write(new_file_string)
     end
   end
