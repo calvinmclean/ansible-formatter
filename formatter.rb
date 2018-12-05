@@ -15,7 +15,7 @@ def main
 
   if ARGV.include?('-h') or ARGV.include?('--help')
     print usage
-    print "Change formatting of Ansible task files from oneline syntax to dictionary style\n"
+    print "Change formatting of Ansible task files from oneline syntax to map syntax\n"
     print "Use -f or --files to format single files\n"
     print "Use -d or --dir to format all files in ROLE_DIR/*/tasks/*.yml\n"
     exit(0)
