@@ -1,16 +1,47 @@
 #!/usr/bin/ruby
 
 def main
-  directory = ARGV[0]
-  files = Dir.glob("#{directory}/**/tasks/*.yml")
+
+  usage = "Usage:\n" \
+        "  ./formatter.rb [-f | --files] FILE...\n" \
+        "  ./formatter.rb [-d | --dir] ROLE_DIR\n"
+  $verbose = false
+
+  if ARGV.include?('-v') or ARGV.include?('--verbose')
+    ARGV.delete('-v')
+    ARGV.delete('--verbose')
+    $verbose = true
+  end
+
+  if ARGV.include?('-h') or ARGV.include?('--help')
+    print usage
+    print "Change formatting of Ansible task files from oneline syntax to dictionary style\n"
+    print "Use -f or --files to format single files\n"
+    print "Use -d or --dir to format all files in ROLE_DIR/*/tasks/*.yml\n"
+    exit(0)
+  elsif ARGV.include?('-f') or ARGV.include?('--files')
+    ARGV.delete('-f')
+    ARGV.delete('--files')
+    files = ARGV
+  elsif ARGV.include?('-d') or ARGV.include?('--dir')
+    ARGV.delete('-d')
+    ARGV.delete('--dir')
+    files = Dir.glob("#{ARGV[0].chomp('/')}/*/tasks/*.yml")
+  else
+    print usage
+    print "Try './formatter.rb --help' for more information.\n"
+    exit(1)
+  end
 
   files.each do |file_name|
     new_file_string = ''
+    changed = false
     File.open(file_name, 'r') do |file|
       file.each_line do |line|
         if safe_line?(line)
           new_file_string += line
         else
+          changed = true
           module_name, module_data = extract_info(line)
           new_file_string += "#{module_name}:\n"
           spacing = module_name.match(/^\s*/)[0]
@@ -22,6 +53,7 @@ def main
       end
     end
     File.open("#{file_name}", 'w+') do |file|
+      print "Formatting #{file_name}\n" if $verbose and changed
       file.write(new_file_string)
     end
   end
