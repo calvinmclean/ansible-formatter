@@ -3,8 +3,8 @@
 def main
 
   usage = "Usage:\n" \
-        "  ./formatter.rb [-n N] [-f | --files] FILE...\n" \
-        "  ./formatter.rb [-n N] [-d | --dir] ROLE_DIR\n"
+        "  ./formatter.rb [-n N] FILE...\n" \
+        "  ./formatter.rb [-n N] ROLE_DIR...\n"
 
   # Individual optional command-line options
   $verbose = false
@@ -24,23 +24,22 @@ def main
   if ARGV.include?('-h') or ARGV.include?('--help')
     print usage
     print "Change formatting of Ansible task files from oneline syntax to map syntax\n"
-    print "Use -f or --files to format single files\n"
-    print "Use -d or --dir to format all files in ROLE_DIR/*/tasks/*.yml\n"
     print "Use -n to specify the max number of key=value pairs in a single line. Default 2\n"
     exit(0)
-  elsif ARGV.include?('-f') or ARGV.include?('--files')
-    ARGV.delete('-f')
-    ARGV.delete('--files')
-    files = ARGV
-  elsif ARGV.include?('-d') or ARGV.include?('--dir')
-    ARGV.delete('-d')
-    ARGV.delete('--dir')
-    files = Dir.glob("#{ARGV[0].chomp('/')}/*/tasks/*.yml")
-  else
+  elsif ARGV.size == 0
     print usage
     print "Try './formatter.rb --help' for more information.\n"
     exit(1)
   end
+
+  # Get list of files from args and find files in directory
+  files = ARGV.map do |item|
+    if File.file?(item)
+      item
+    elsif Dir.exist?(item)
+      Dir.glob("#{item.chomp('/')}/*/tasks/*.yml")
+    end
+  end.flatten
 
   files.each do |file_name|
     new_file_string = ''
