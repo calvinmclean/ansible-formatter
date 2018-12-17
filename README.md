@@ -30,6 +30,7 @@ The following options are available:
 | Option             | Argument    | Required      | Default | Description                                                        |
 | :----------------- | :---------- | :------------ | :------ | :----------------------------------------------------------------- |
 | `-v`, `--verbose`  | None        | No            | False   | Print which files are being formatted                              |
+| `-d`, `--dry-run`  | None        | No            | False   | Run without doing anything, forces verbose                         |
 | `-n`               | N (integer) | No            | 2       | Specify the maximum number of `key=value` pairs in one-line syntax |
 
 **Example**:

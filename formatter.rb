@@ -3,16 +3,19 @@
 def main
 
   usage = "Usage:\n" \
-        "  ./formatter.rb [-n N] FILE...\n" \
-        "  ./formatter.rb [-n N] ROLE_DIR...\n"
+        "  ./formatter.rb [-v|--verbose] [-d|--dry-run] [-n N] FILE...\n" \
+        "  ./formatter.rb [-v|--verbose] [-d|--dry-run] [-n N] ROLE_DIR...\n"
 
   # Individual optional command-line options
-  $verbose = false
-  if ARGV.include?('-v') or ARGV.include?('--verbose')
-    ARGV.delete('-v')
-    ARGV.delete('--verbose')
-    $verbose = true
-  end
+  $verbose = ARGV.include?('-v') or ARGV.include?('--verbose')
+  ARGV.delete('-v')
+  ARGV.delete('--verbose')
+
+  $dryrun = ARGV.include?('-d') or ARGV.include?('--dry-run')
+  ARGV.delete('-d')
+  ARGV.delete('--dry-run')
+
+  $verbose = true if $dryrun
 
   $num_pairs = 2
   if ARGV.include?('-n')
@@ -60,10 +63,10 @@ def main
         end
       end
     end
+    print "Changed #{changed} lines in #{file_name}\n" if $verbose and changed > 0
     File.open("#{file_name}", 'w+') do |file|
-      print "Changed #{changed} lines in #{file_name}\n" if $verbose and changed > 0
-      file.write(new_file_string)
-    end
+      file.write(new_file_string) if not $dryrun
+    end if not $dryrun
   end
 end
 
